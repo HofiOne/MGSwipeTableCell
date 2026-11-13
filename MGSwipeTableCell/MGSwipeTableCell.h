@@ -251,6 +251,8 @@ typedef NS_ENUM(NSInteger, MGSwipeEasingFunction) {
 @property (nonatomic) BOOL allowsOppositeSwipe;
 // default is NO.  Controls whether the cell selection/highlight status is preserved when expansion occurs
 @property (nonatomic) BOOL preservesSelectionStatus;
+/** Default is NO. Use live swipeContentView content without a bitmap or selection-style changes. */
+@property (nonatomic) BOOL usesSwipeContentViewOnly;
 /* default is NO. Controls whether dismissing a swiped cell when tapping outside of the cell generates a real touch event on the other cell.
  Default behaviour is the same as the Mail app on iOS. Enable it if you want to allow to start a new swipe while a cell is already in swiped in a single step.  */
 @property (nonatomic) BOOL touchOnDismissSwipe;

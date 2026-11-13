@@ -683,6 +683,7 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
     _triggerStateChanges = YES;
     _allowsSwipeWhenTappingButtons = YES;
     _preservesSelectionStatus = NO;
+    _usesSwipeContentViewOnly = NO;
     _allowsOppositeSwipe = YES;
     _firstSwipeState = MGSwipeStateNone;
     
@@ -773,7 +774,8 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
         CGSize prevSize = _swipeView.bounds.size;
         _swipeOverlay.frame = CGRectMake(0, 0, self.bounds.size.width, self.contentView.bounds.size.height);
         [self fixRegionAndAccesoryViews];
-        if (_swipeView.image &&  !CGSizeEqualToSize(prevSize, _swipeOverlay.bounds.size)) {
+        if ((_swipeView.image || (_usesSwipeContentViewOnly && _swipeContentView)) &&
+            !CGSizeEqualToSize(prevSize, _swipeOverlay.bounds.size)) {
             //refresh safeInsets in situations like layout change, orientation change, table resize, etc.
             UIEdgeInsets safeInsets = [self getSafeInsets];
             // Refresh safe insets
@@ -876,9 +878,15 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
         [_delegate swipeTableCellWillBeginSwiping:self];
     }
     
-    // snapshot cell without separator
-    CGSize  cropSize        = CGSizeMake(self.bounds.size.width, self.contentView.bounds.size.height);
-    _swipeView.image = [self imageFromView:self cropSize:cropSize];
+    BOOL useLiveContent = _usesSwipeContentViewOnly && _swipeContentView != nil;
+    if (useLiveContent) {
+        _swipeView.image = nil;
+    }
+    else {
+        // snapshot cell without separator
+        CGSize  cropSize        = CGSizeMake(self.bounds.size.width, self.contentView.bounds.size.height);
+        _swipeView.image = [self imageFromView:self cropSize:cropSize];
+    }
     
     _swipeOverlay.hidden = NO;
     if (_swipeContentView)
@@ -896,7 +904,8 @@ static inline CGFloat mgEaseInOutBounce(CGFloat t, CGFloat b, CGFloat c) {
     }
 
     _previusSelectionStyle = self.selectionStyle;
-    self.selectionStyle = UITableViewCellSelectionStyleNone;
+    if (!useLiveContent)
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
     [self setAccesoryViewsHidden:YES];
     
     _tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapHandler:)];
